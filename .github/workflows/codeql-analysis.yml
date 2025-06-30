@@ -57,7 +57,7 @@ jobs:
     # 4. (Optionnel) Téléchargement des résultats pour débogage
     - name: Upload analysis results
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: codeql-results
         path: ./codeql-results

@@ -36,7 +36,7 @@ jobs:
 
     # 2. Initialisation de CodeQL
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v3
       with:
         languages: javascript
         # Configuration personnalisée
@@ -48,7 +48,7 @@ jobs:
 
     # 3. Exécution de l'analyse
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v3
       with:
         category: "/language:javascript"
         upload: true

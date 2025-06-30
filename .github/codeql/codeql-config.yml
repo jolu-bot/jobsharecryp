@@ -1,0 +1,37 @@
+---
+name: "Custom CodeQL Configuration"
+
+disabled-queries:
+  # Désactive les avertissements pour les dépendances non vérifiées
+  - "js/missing-token-validation"
+  - "js/disabled-certificate-check"
+
+queries:
+  - name: Security
+    uses: security-and-quality
+  - name: Custom Queries
+    uses: ./codeql/custom-queries
+    with:
+      label: custom
+
+extraction:
+  javascript:
+    # Ignore les dossiers de dépendances
+    ignore:
+      - "**/node_modules/**"
+      - "**/dist/**"
+      - "**/build/**"
+      - "**/coverage/**"
+      - "**/__tests__/**"
+      - "**/test/**"
+      - "**/tests/**"
+
+# Configuration spécifique pour JavaScript/TypeScript
+javascript:
+  # Active l'analyse des dépendances
+  dependency-check:
+    enabled: true
+    # Niveau de gravité minimum pour échouer le build
+    fail-on-severity: high
+    # Vérifie les vulnérabilités connues
+    check-for-known-vulnerabilities: true

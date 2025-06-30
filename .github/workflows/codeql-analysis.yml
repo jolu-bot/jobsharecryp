@@ -1,0 +1,66 @@
+name: "CodeQL Security Analysis"
+
+on:
+  # Déclenche l'analyse sur chaque push sur la branche main
+  push:
+    branches: [ "main" ]
+  # Déclenche une analyse sur chaque pull request ciblant la branche main
+  pull_request:
+    branches: [ "main" ]
+  # Planifie une analyse hebdomadaire (tous les dimanches à minuit)
+  schedule:
+    - cron: '0 0 * * 0'
+  # Permet d'exécuter manuellement l'analyse
+  workflow_dispatch:
+
+# Définit les variables d'environnement pour toutes les tâches
+env:
+  CODEQL_CLI_ARGS: --ram=2048 --threads=2
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript' ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        # Fetch full history pour une analyse plus précise
+        fetch-depth: 0
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+        # Configure les chemins à inclure/exclure de l'analyse
+        config-file: ./.github/codeql/codeql-config.yml
+        # Active l'analyse avancée pour JavaScript/TypeScript
+        queries: +security-and-quality
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:${{ matrix.language }}"
+        # Télécharge les résultats pour analyse
+        upload: true
+        # Échoue le build si des problèmes critiques sont trouvés
+        fail-on-error: true
+
+    # Tâche optionnelle pour les artefacts de débogage
+    - name: Upload SARIF results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: codeql-results
+        path: ./codeql-results
+        retention-days: 7

@@ -1,0 +1,49 @@
+version: 2
+updates:
+  # Maintenez les actions GitHub à jour
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Limite le nombre de PR ouvertes simultanément
+    open-pull-requests-limit: 5
+    # Attribue les PR à l'équipe de sécurité
+    assignees:
+      - "jolu-bot"
+    labels:
+      - "dependencies"
+      - "security"
+
+  # Maintenez les dépendances npm à jour
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    # Ignore les mises à jour majeures par défaut
+    versioning-strategy: increase
+    # Groupe les mises à jour mineures et de correctifs
+    groups:
+      npm-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    assignees:
+      - "jolu-bot"
+    labels:
+      - "dependencies"
+      - "javascript"
+
+  # Configuration pour les mises à jour majeures (à activer manuellement si nécessaire)
+  # - package-ecosystem: "npm"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "monthly"
+  #   versioning-strategy: increase
+  #   allow:
+  #     - dependency-type: "all"
+  #   labels:
+  #     - "dependencies"
+  #     - "major-update"

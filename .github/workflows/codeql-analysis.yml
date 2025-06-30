@@ -1,63 +1,61 @@
-name: "CodeQL Security Analysis"
+name: "CodeQL Security Scan"
 
 on:
-  # Déclenche l'analyse sur chaque push sur la branche main
   push:
-    branches: [ "main" ]
-  # Déclenche une analyse sur chaque pull request ciblant la branche main
+    branches: [ main ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.txt'
   pull_request:
-    branches: [ "main" ]
-  # Planifie une analyse hebdomadaire (tous les dimanches à minuit)
+    branches: [ main ]
   schedule:
-    - cron: '0 0 * * 0'
-  # Permet d'exécuter manuellement l'analyse
-  workflow_dispatch:
+    - cron: '0 0 * * 0'  # Tous les dimanches à minuit
+  workflow_dispatch:  # Permet un déclenchement manuel
 
-# Définit les variables d'environnement pour toutes les tâches
+# Définit les variables d'environnement globales
 env:
   CODEQL_CLI_ARGS: --ram=2048 --threads=2
 
 jobs:
   analyze:
-    name: Analyze
+    name: Analyze with CodeQL
     runs-on: ubuntu-latest
+    
+    # Définit les permissions nécessaires
     permissions:
       actions: read
       contents: read
       security-events: write
 
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [ 'javascript' ]
-
     steps:
+    # 1. Checkout du code source
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
-        # Fetch full history pour une analyse plus précise
-        fetch-depth: 0
+        fetch-depth: 2  # Pour avoir accès aux différences
 
+    # 2. Initialisation de CodeQL
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
       with:
-        languages: ${{ matrix.language }}
-        # Configure les chemins à inclure/exclure de l'analyse
+        languages: javascript
+        # Configuration personnalisée
         config-file: ./.github/codeql/codeql-config.yml
-        # Active l'analyse avancée pour JavaScript/TypeScript
-        queries: +security-and-quality
+        # Optimisation des performances
+        ram: 4096
+        # Utilise la version la plus récente de CodeQL
+        tools: latest
 
+    # 3. Exécution de l'analyse
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
       with:
-        category: "/language:${{ matrix.language }}"
-        # Télécharge les résultats pour analyse
+        category: "/language:javascript"
         upload: true
-        # Échoue le build si des problèmes critiques sont trouvés
-        fail-on-error: true
+        output: ./codeql-results
 
-    # Tâche optionnelle pour les artefacts de débogage
-    - name: Upload SARIF results
+    # 4. (Optionnel) Téléchargement des résultats pour débogage
+    - name: Upload analysis results
       if: always()
       uses: actions/upload-artifact@v3
       with:

@@ -30,7 +30,7 @@ jobs:
     steps:
     # 1. Checkout du code source
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 2  # Pour avoir accès aux différences
 
